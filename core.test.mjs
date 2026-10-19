@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {payload,validateEvents,eventId,parseAI} from './core.mjs';
+assert.deepEqual(payload(20261),{filter:{hoc_ky:20261,ten_hoc_ky:''},additional:{paging:{limit:100,page:1},ordering:[{name:null,order_type:null}]}});
+assert.throws(()=>payload('invalid'));
+const e={summary:'Toán',start:'2026-10-19T07:00:00+07:00',end:'2026-10-19T09:00:00+07:00'};
+assert.equal(validateEvents([e]).length,1);
+assert.throws(()=>validateEvents([{...e,end:e.start}]));
+assert.throws(()=>validateEvents([e,e]));
+assert.throws(()=>validateEvents([{...e,start:'2026-02-30T07:00:00+07:00',end:'2026-02-30T09:00:00+07:00'}]));
+assert.throws(()=>parseAI('{"events":[{"summary":"x"}]}'));
+assert.equal(await eventId(e,20261),await eventId(e,'20261'));
+assert.notEqual(await eventId(e,20261),await eventId(e,20262));
+assert.match(await eventId(e,20261),/^[a-v0-9]{5,1024}$/);
+console.log('10 checks passed');

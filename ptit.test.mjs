@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {convertPTIT,toICS} from './ptit.mjs';
+const row={ten_mon:'Môn thử nghiệm',ngay_hoc:'2026-10-19T00:00:00',tiet_bat_dau:13,so_tiet:3,ma_phong:'P1',link_hoc_online:'https://example.org/class',id_tkb:'same'};
+const wrap=rows=>({data:{total_pages:1,ds_tiet_trong_ngay:[13,14,15].map((t,i)=>({tiet:t,gio_bat_dau:`${19+i}:00`,gio_ket_thuc:`${19+i}:50`,nhhk:20261})),ds_tuan_tkb:[{ds_thoi_khoa_bieu:rows}]}});
+const result=convertPTIT(wrap([row]),20261);
+assert.equal(result.events[0].start,'2026-10-19T19:00:00+07:00');assert.equal(result.events[0].end,'2026-10-19T21:50:00+07:00');
+assert.match(result.events[0].description,/https:\/\/example.org\/class/);
+assert.equal(convertPTIT(wrap([row,{...row,ngay_hoc:'2026-10-26T00:00:00'}]),20261).events.length,2);
+assert.equal(convertPTIT(wrap([row,row]),20261).duplicates,1);
+assert.equal(convertPTIT(wrap([{...row,is_nghi_day:true}]),20261).cancelled,1);
+assert.equal(convertPTIT(wrap([{...row,is_day_bu:true}]),20261).events.length,1);
+assert.throws(()=>convertPTIT(wrap([row]),20262));
+assert.throws(()=>convertPTIT(wrap([{...row,so_tiet:4}]),20261));
+assert.throws(()=>convertPTIT(wrap([{...row,ngay_hoc:'2026-02-30T00:00:00'}]),20261));
+const partial=wrap([row]);partial.data.total_pages=2;assert.throws(()=>convertPTIT(partial,20261));
+const ics=await toICS(result.events,20261);assert.match(ics,/DTSTART:20261019T120000Z/);assert.match(ics,/DTEND:20261019T145000Z/);assert.ok(ics.endsWith('\r\n'));
+for(const line of ics.split('\r\n'))assert.ok(new TextEncoder().encode(line).length<=75);
+console.log('PTIT converter checks passed');

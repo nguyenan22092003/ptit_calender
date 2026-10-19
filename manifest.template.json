@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "ptit calender",
+  "version": "1.5.0",
+  "minimum_chrome_version": "116",
+  "description": "Chuy\u1ec3n th\u1eddi kh\u00f3a bi\u1ec3u PTIT sang Google Calendar, kh\u00f4ng c\u1ea7n AI ho\u1eb7c API key.",
+  "permissions": [
+    "storage",
+    "identity",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://qldttx.pttc1.edu.vn/*",
+    "https://www.googleapis.com/*"
+  ],
+  "oauth2": {
+    "client_id": "REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar.app.created",
+      "https://www.googleapis.com/auth/calendar.calendarlist.readonly"
+    ]
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "ptit calender"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://qldttx.pttc1.edu.vn/*"
+      ],
+      "js": [
+        "portal.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
